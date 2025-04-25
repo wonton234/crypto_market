@@ -17,9 +17,16 @@ const ClientDropdown =({onClientSelect})=>
             
             
                 // api endpoint response and catch bad response
-                const response = await axios.get('')
-                
-                setClients(response.data)
+                const response = await axios.get('http://127.0.0.1:5000//api/clients')
+                if(response.data.success)
+                {
+                    setClients(response.data.data)
+                }
+                else 
+                {
+                    setError('Failed to load clients');
+                }
+
                 setIsLoading(false)
             
             }catch(err){
@@ -37,18 +44,11 @@ const ClientDropdown =({onClientSelect})=>
 
         // Find the selected client object with its keys
         if (clientId) {
-            const selectedClient = clients.find(client =>client.id ===clientId)
-            // take selected cleitnand 
-            if (selectedClient)
-            {
-            onClientSelect(
-                {
-                    name:selectedClient.name,
-                    publicKey:selectedClient.publicKey
-                }
-            )
-            }
-        }
+            onClientSelect({
+              name: clientId, // Just use the client name from the dropdown
+            
+            });
+          }
     }
 
     return(
@@ -67,7 +67,11 @@ const ClientDropdown =({onClientSelect})=>
                 </label>
                 <select id="dropdown" value={selectedClient} onChange={handleChange}>
                     <option value="">--Select--</option>
-    
+                {clients.map((client) => (
+                <option key={client} value={client}>
+                {client}
+                </option>
+            ))}
                         
                 </select>
                 </>
