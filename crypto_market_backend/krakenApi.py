@@ -75,3 +75,5 @@ class KrakenAPI:
         }
 
         return self.kraken_request(uri_path,data)
+    
+       
