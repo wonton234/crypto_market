@@ -1,24 +1,22 @@
-import logo from './logo.svg';
+import ClientDropdown from './Components/ClientDropdown'
+import React, {useState} from 'react'
 import './App.css';
 
 function App() {
+  // being able to use clients in different Components we need to have current client stored in a parent 
+  // function
+  const [selectedClientData, setSelectedClientData] = useState(null);
+
+  const handleClientSelect = (clientData)=>
+  {
+    setSelectedClientData(clientData);
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{display:'flex'}}>
+      <ClientDropdown onClientSelect={handleClientSelect}/>
+      {/* <Exchange/> */}
     </div>
+   
   );
 }
 
