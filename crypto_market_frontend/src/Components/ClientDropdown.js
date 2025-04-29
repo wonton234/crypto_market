@@ -2,7 +2,7 @@ import axios from 'axios';
 import {useState, useEffect} from 'react'
 const ClientDropdown =({onClientSelect})=>
 {
-    const [clients, setClients] = useState();
+    const [clients, setClients] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError]= useState(null);
     const [selectedClient,setSelectedClient] = useState('');
@@ -17,7 +17,7 @@ const ClientDropdown =({onClientSelect})=>
             
             
                 // api endpoint response and catch bad response
-                const response = await axios.get('http://127.0.0.1:5000//api/clients')
+                const response = await axios.get('http://127.0.0.1:5000/api/clients')
                 if(response.data.success)
                 {
                     setClients(response.data.data)
@@ -41,13 +41,10 @@ const ClientDropdown =({onClientSelect})=>
     {
         const clientId = e.target.value;
         setSelectedClient(clientId)
-
+        console.log(clientId)
         // Find the selected client object with its keys
         if (clientId) {
-            onClientSelect({
-              name: clientId, // Just use the client name from the dropdown
-            
-            });
+            onClientSelect(clientId)
           }
     }
 

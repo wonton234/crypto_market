@@ -1,4 +1,5 @@
 import ClientDropdown from './Components/ClientDropdown'
+import Portfolio from './Components/Portfolio';
 import React, {useState} from 'react'
 import './App.css';
 
@@ -14,7 +15,7 @@ function App() {
   return (
     <div style={{display:'flex'}}>
       <ClientDropdown onClientSelect={handleClientSelect}/>
-      {/* <Exchange/> */}
+      <Portfolio selectedClient={selectedClientData}/>
     </div>
    
   );

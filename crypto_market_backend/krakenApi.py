@@ -7,7 +7,7 @@ import urllib.parse
 import requests
 
 class KrakenAPI:
-    def init(self,api_key,api_secret):
+    def __init__(self,api_key,api_secret):
         """
         initialize Kraken API client with API key and secret.
 
@@ -60,6 +60,26 @@ class KrakenAPI:
             print(f"Error making requests: {e}")
             return None
     
+    # formal and clean balances
+    def format_balances(self,balances):
+        result = {}
+        if 'result'in balances:
+            for asset, amount in balances['result'].items():
+                amount = float(amount)
+
+                if amount == 0:
+                    continue
+
+                # Clean up asset names (Remove leading 'X' and 'Z' for common currencies)
+                if asset.startswith('X') or asset.startswith('Z'):
+                    clean_asset = asset[1:]
+                else:
+                    clean_asset = asset
+                
+                result[clean_asset] = amount
+        return result
+    
+
     def get_account_balance(self):
         """
         Retrieve account balance from Kraken.
@@ -68,7 +88,7 @@ class KrakenAPI:
         """
         nonce = str(int(time.time()*1000))
         print("Nonce: ",nonce)
-        uri_path = '0/private/Balance'
+        uri_path = '/0/private/Balance'
 
         data = {
             "nonce": nonce
