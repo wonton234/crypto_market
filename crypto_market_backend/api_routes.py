@@ -2,9 +2,9 @@ from flask import request, jsonify,Blueprint
 from krakenApi import KrakenAPI
 import os
 from dotenv import load_dotenv
+from helpers import check_key_name
 
 api_routes = Blueprint('api_routes',__name__)
-
 load_dotenv()
 
 api_keys_store = {
@@ -24,62 +24,70 @@ current_Exchanges = {
     "kraken":api_keys_store,
 }
 
-# get all clients 
+
+# ---------- shared check ----------
+
+def validate_and_get_creds():
+    """
+    Wrapper to keep routes clean:
+    reads key_name from request.json and returns either
+        (creds_dict, None) or (None, flask_response)
+    """
+
+    data  = request.get_json(silent=True) or {}
+    key_name = data.get("key_name")
+    ok,payload,status = check_key_name(key_name, api_keys_store)
+    if not ok:
+        return None, (payload,status)
+    return payload,None
+
+# ----------------------------------
+
+
+# get all clients
+# :return: list of clients that are accessible 
 @api_routes.route('/api/clients',methods=['GET'])
 def get_Clients():
     # return list of clients that are accessible
-    return jsonify({
-        'success': True,
-        'data': list(api_keys_store.keys()) 
-    })
+    return jsonify({'success': True,'data': list(api_keys_store.keys())})
 
 # check balance
 @api_routes.route('/api/check-balance',methods = ['POST'])
-
 def check_balance():
-    # get key data from api_store
-    data = request.json
-    key_name = data.get('key_name')
-   
-    if not key_name:
-        return jsonify({
-            'success': False,
-            'message': "Missing key name"
-        }),400
-    if key_name not in api_keys_store:
-        return jsonify({
-            'success': False,
-            'message': f'Key "{key_name}" not found'
-        }),404
+    creds, error_resp = validate_and_get_creds()
+    if error_resp:
+        return error_resp
     
-    key_data = api_keys_store[key_name]
     
-    kraken = KrakenAPI(key_data['api_key'],key_data['api_secret'])
+    kraken = KrakenAPI(creds['api_key'],creds['api_secret'])
 
     # get account balance
     try:
         balance_info= kraken.get_account_balance()
-        if 'error' in balance_info and balance_info['error']:
-            return jsonify({
-            'success': False,
-            'message': str(balance_info['error'])
-            }),400
-        # clean info from extra letters
-        cleaned_info = kraken.format_balances(balance_info)
-       
-        if 'error' in cleaned_info:
+        if not balance_info:
             return jsonify({
                 'success': False,
-                'message': str(balance_info['error'])
-            })
+                'message': "Failed to retrieve balance."
+            }), 500
+
         
         return jsonify({
             'success': True,
-            'key_name': key_name,
-            'data':cleaned_info
+            'key_name': creds.get('key_name'),  # you may need to pass this in validate_and_get_creds()
+            'data': balance_info['result']
         })
+        
     except Exception as e:
         return jsonify({
             'success': False,
             'message': str(e)
-        }),500
+        }), 500
+    
+@api_routes.route('/api/get-open-orders',methods = ['POST'])
+def get_open_orders():
+    data = request.json
+    key_name = data.get('key_name')
+
+
+
+    

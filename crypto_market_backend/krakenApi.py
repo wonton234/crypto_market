@@ -62,21 +62,27 @@ class KrakenAPI:
     
     # formal and clean balances
     def format_balances(self,balances):
+
+        """
+        Clean up and format the kraken balance response.
+
+        :param balances: Raw balance response from Kraken
+        :return: Dictionary of non-zero, cleaned balances
+        """
+
         result = {}
-        if 'result'in balances:
-            for asset, amount in balances['result'].items():
+        for asset, amount in balances.get('result',{}).items():
+            try:
                 amount = float(amount)
+            except (ValueError,TypeError):
+                continue #skip if amount isn't a valid number
+            if amount == 0:
+                continue
 
-                if amount == 0:
-                    continue
-
-                # Clean up asset names (Remove leading 'X' and 'Z' for common currencies)
-                if asset.startswith('X') or asset.startswith('Z'):
-                    clean_asset = asset[1:]
-                else:
-                    clean_asset = asset
-                
-                result[clean_asset] = amount
+            # Clean up asset names (Remove leading 'X' and 'Z' for common currencies)
+            clean_asset = asset[1:] if asset.startswith(('X','Z')) else asset
+            result[clean_asset] = amount
+            
         return result
     
 
@@ -87,13 +93,37 @@ class KrakenAPI:
         :return: Account balance details
         """
         nonce = str(int(time.time()*1000))
-        print("Nonce: ",nonce)
         uri_path = '/0/private/Balance'
 
         data = {
             "nonce": nonce
         }
 
+        raw_response =  self.kraken_request(uri_path,data)
+        if not raw_response:
+            return {'error': 'Empty response from Kraken'}
+
+        if 'error' in raw_response and raw_response['error']:
+            return raw_response  # Pass along the Kraken error
+    
+        cleaned_result = self.format_balances(raw_response)
+        return {'result': cleaned_result}
+    
+    def get_open_orders(self):
+        """
+        Retrieve open account orders
+
+        :return: Open orders for the account
+        """
+
+        nonce = str(int(time.time()*1000))
+        
+        uri_path = '/0/private/OpenOrders'
+        data ={
+            "nonce": nonce
+        }
+
         return self.kraken_request(uri_path,data)
+
     
        

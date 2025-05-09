@@ -13,9 +13,16 @@ function App() {
     setSelectedClientData(clientData);
   }
   return (
-    <div style={{display:'flex'}}>
+    <div style={{
+    display: 'flex',
+    flexWrap: 'wrap', // This ensures components stack on small screens
+    gap: '2rem', // Adds space between the components
+    alignItems: 'flex-start', // Aligns items at the top
+    }}>
       <ClientDropdown onClientSelect={handleClientSelect}/>
       <Portfolio selectedClient={selectedClientData}/>
+      {/* OpenOrders */}
+      {/* Add_Order*/}
     </div>
    
   );
