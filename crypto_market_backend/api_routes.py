@@ -85,9 +85,30 @@ def check_balance():
     
 @api_routes.route('/api/get-open-orders',methods = ['POST'])
 def get_open_orders():
-    data = request.json
-    key_name = data.get('key_name')
+    
+    creds, error_resp = validate_and_get_creds()
+    if error_resp:
+        return error_resp
+    
+    kraken = KrakenAPI(creds['api_key'],creds['api_secret'])
 
-
+    try:
+        open_orders = kraken.get_open_orders()
+        if not open_orders:
+            return jsonify({
+                'success': False,
+                'message': "Failed to retrieve open orders"
+            }), 500
+        print(open_orders['result'])
+        return jsonify({
+            'success': True,
+            'key_name': creds.get('key_name'),  # you may need to pass this in validate_and_get_creds()
+            'data': open_orders['result']
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
 
     

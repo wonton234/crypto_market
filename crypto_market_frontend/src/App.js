@@ -1,5 +1,6 @@
 import ClientDropdown from './Components/ClientDropdown'
 import Portfolio from './Components/Portfolio';
+import OpenOrders from './Components/OpenOrders';
 import React, {useState} from 'react'
 import './App.css';
 
@@ -21,7 +22,7 @@ function App() {
     }}>
       <ClientDropdown onClientSelect={handleClientSelect}/>
       <Portfolio selectedClient={selectedClientData}/>
-      {/* OpenOrders */}
+      <OpenOrders selectedClient = {selectedClientData}/>
       {/* Add_Order*/}
     </div>
    

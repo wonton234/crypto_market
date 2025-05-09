@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, {useState,useEffect} from 'react'
-
+import '../css/Portfolio.css';
 
 const Portfolio = ({selectedClient})=>
 {
@@ -61,25 +61,26 @@ const Portfolio = ({selectedClient})=>
     
     
     return (
-    <div style={{marginTop: '2rem'}}>
+    <div className="portfolio-container" >
         <h3>Portfolio for {selectedClient}</h3>
-        <table style={{borderCollapse: 'collapse', width:'50%',marginTop:'2rem',marginLeft:'0'}}>
+         {balanceData && (
+        <table className="portfolio-table">
             <thead>
                 <tr>
-                    <th style={{ border: '1px solid #ccc', padding: '8px' }}>Coin Name</th>
-                    <th style={{ border: '1px solid #ccc', padding: '8px' }}>Amount</th>
+                    <th>Coin</th>
+                    <th>Amount</th>
                 </tr>
             </thead>
             <tbody>
                 {Object.entries(balanceData).map(([asset, amount]) => (
                     <tr key={asset}>
-                        <td style={{ border: '1px solid #ccc', padding: '8px' }}>{asset}</td>
-                        <td style={{ border: '1px solid #ccc', padding: '8px' }}>{amount}</td>
+                        <td>{asset}</td>
+                        <td>{amount}</td>
                     </tr>
                 ))}
             </tbody>
         </table>
-        
+         )}
     </div>
     );
     

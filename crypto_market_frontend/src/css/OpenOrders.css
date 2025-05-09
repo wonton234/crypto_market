@@ -1,0 +1,46 @@
+
+.open-orders-container {
+  margin-top: 1rem;
+  width: 100%;
+  overflow-x: auto; /* ensures responsiveness on smaller screens */
+}
+
+.open-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  font-size: 0.95rem;
+}
+
+.open-orders-table th,
+.open-orders-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.open-orders-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.open-orders-table tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.open-orders-table tr:hover {
+  background-color: #f0f8ff;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.loading-message,
+.error-message,
+.no-data-message {
+  font-style: italic;
+  margin-top: 1rem;
+  color: #555;
+}
+
+.error-message {
+  color: red;
+}
