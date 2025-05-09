@@ -2,8 +2,9 @@ import axios from "axios";
 import React, {useState,useEffect} from 'react'
 import '../css/Portfolio.css';
 
-const Portfolio = ({selectedClient})=>
+const Portfolio = ({selectedClient,onPortfolioShown })=>
 {
+    
     const [isLoading,setIsLoading]= useState(true);
     const [balanceData,setBalanceData] = useState(null);
     const [error,setError] = useState(null);
@@ -32,6 +33,7 @@ const Portfolio = ({selectedClient})=>
                 if (response.data.success)
                 {
                     setBalanceData(response.data.data)
+                    onPortfolioShown(response.data.data)
                 }else{
                     setError(response.data.message || 'Failed to fetch balance')
                 }

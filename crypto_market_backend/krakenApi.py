@@ -119,11 +119,41 @@ class KrakenAPI:
         nonce = str(int(time.time()*1000))
         
         uri_path = '/0/private/OpenOrders'
-        data ={
+        data = {
             "nonce": nonce
         }
 
         return self.kraken_request(uri_path,data)
+    def add_order(self,ordertype,type,volume,pair,price=None):
+        """
+        Place order on kraken exchange
+
+        :param ordertype: Order type (market, limit, etc.)
+        :param type: buy or sell
+        :param volume: Amount to buy/sell
+        :param pair: Trading pair
+        :param price: Price for limit orders (optional - required for limit orders, ignored for market orders)
+        :return: API response from Kraken
+        """
+        
+        nonce = str(int(time.time()*1000))
+
+        uri_path = '/0/private/AddOrder'
+
+        data = {
+            "nonce":nonce,
+            "ordertype":ordertype,
+            "type":type,
+            "volume": volume,
+            "pair":pair
+        }
+
+        if price is not None:
+            data["price"] = price
+
+        return self.kraken_request(uri_path,data)
+
+
 
     
        

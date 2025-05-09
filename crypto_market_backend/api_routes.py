@@ -73,7 +73,7 @@ def check_balance():
         
         return jsonify({
             'success': True,
-            'key_name': creds.get('key_name'),  # you may need to pass this in validate_and_get_creds()
+            'key_name': creds.get('key_name'),  
             'data': balance_info['result']
         })
         
@@ -82,7 +82,9 @@ def check_balance():
             'success': False,
             'message': str(e)
         }), 500
-    
+
+
+# endpoint to get open orders
 @api_routes.route('/api/get-open-orders',methods = ['POST'])
 def get_open_orders():
     
@@ -99,10 +101,10 @@ def get_open_orders():
                 'success': False,
                 'message': "Failed to retrieve open orders"
             }), 500
-        print(open_orders['result'])
+        
         return jsonify({
             'success': True,
-            'key_name': creds.get('key_name'),  # you may need to pass this in validate_and_get_creds()
+            'key_name': creds.get('key_name'),  
             'data': open_orders['result']
         })
     except Exception as e:
@@ -110,5 +112,100 @@ def get_open_orders():
             'success': False,
             'message': str(e)
         }), 500
+
+
+# add order
+@api_routes.route('/api/post-add-order',methods = ['POST'])
+def add_order():
+
+    # extract fields
+    request_data = request.get_json()
+    ordertype = request_data.get('ordertype')
+    type_ = request_data.get('type')
+    volume = request_data.get('volume')
+    pair = request_data.get('pair')
+    price = request_data.get('price')
+    
+    
+    # Validate required fields
+
+    if not all([ordertype, type_, volume, pair]):
+        return jsonify({
+            'success': False,
+            'message': 'Missing one or more required fields: ordertype, type_, volume, pair'
+        }), 400
+    
+    # Validate ordertype and type_
+    valid_order_types = ['limit', 'market']
+    valid_sides = ['buy', 'sell']
+    if ordertype not in valid_order_types:
+        return jsonify({
+            'success': False,
+            'message': f"Invalid ordertype. Expected one of: {valid_order_types}"
+        }), 400
+    
+    if type_ not in valid_sides:
+        return jsonify({
+            'success': False,
+            'message': f"Invalid type. Expected one of: {valid_sides}"
+        }), 400
+    
+
+    # Validate volume
+    try:
+        volume = float(volume)
+        if volume <= 0:
+            raise ValueError
+    except (ValueError, TypeError):
+        return jsonify({
+            'success': False,
+            'message': 'Volume must be a positive number.'
+        }), 400
+    
+
+    # if limit order, validate price
+    if ordertype == 'limit':
+        if price is None:
+            return jsonify({
+                'success': False,
+                'message': 'Price is required for limit orders.'
+            }), 400
+        try:
+            price = float(price)
+            if price <= 0:
+                raise ValueError
+        except (ValueError, TypeError):
+            return jsonify({
+                'success': False,
+                'message': 'Price must be a positive number.'
+            }), 400
+    else:
+        price = None
+        
+    # validate key name
+    creds, error_resp = validate_and_get_creds()
+    if error_resp:
+        return error_resp
+    
+    kraken = KrakenAPI(creds['api_key'],creds['api_secret'])
+
+    try:
+        add_order_resp = kraken.add_order(ordertype,type_,volume,pair,price)
+        if not add_order_resp:
+            return jsonify({
+                'success':False,
+                'message': "Failed to post add order"
+            })
+        print(add_order_resp['result']['descr'])
+        return jsonify({
+            'success': True,
+            'key_name':creds.get('key_name')
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
 
     
