@@ -11,15 +11,19 @@ function App() {
   // to use the possible Pairs for order Form we need to lift Client Portfolio information
   const [selectedClientData, setSelectedClientData] = useState(null);
   const [selectedClientPortfolio, setSelectedClientPortfolio] = useState(null);
+  const [balanceReady, setBalanceReady] = useState(false);
+
   const handleClientSelect = (clientData)=>
   {
     setSelectedClientData(clientData);
+    setSelectedClientPortfolio(null);
+    setBalanceReady(false);
   };
   const handlePortfolioShown = (clientPortfolio) =>
   {
     setSelectedClientPortfolio(clientPortfolio);
   };
-
+  
   return (
     <div style={{
     display: 'flex',
@@ -28,8 +32,9 @@ function App() {
     alignItems: 'flex-start', // Aligns items at the top
     }}>
       <ClientDropdown onClientSelect={handleClientSelect}/>
-      <Portfolio selectedClient={selectedClientData} onPortfolioShown={handlePortfolioShown}/>
-      <OpenOrders selectedClient = {selectedClientData}/>
+      <Portfolio selectedClient={selectedClientData} onPortfolioShown={handlePortfolioShown}
+       onBalanceReady={() => setBalanceReady(true)}/>
+      {balanceReady &&(<OpenOrders selectedClient = {selectedClientData}/>)}
       <OrderForm selectedClient={selectedClientData} selectedClientPortfolioData = {selectedClientPortfolio}/>
     </div>
    

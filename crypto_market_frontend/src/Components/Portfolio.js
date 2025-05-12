@@ -2,7 +2,7 @@ import axios from "axios";
 import React, {useState,useEffect} from 'react'
 import '../css/Portfolio.css';
 
-const Portfolio = ({selectedClient,onPortfolioShown })=>
+const Portfolio = ({selectedClient,onPortfolioShown,onBalanceReady  })=>
 {
     
     const [isLoading,setIsLoading]= useState(true);
@@ -15,12 +15,13 @@ const Portfolio = ({selectedClient,onPortfolioShown })=>
         if (!selectedClient) return;
 
         setBalanceData(null);
+        setIsLoading(true);
+        setError(null);
 
         const fetchBalance = async()=>
         {
             
-            setIsLoading(true);
-            setError(null);
+           
 
             try{
                 // fetch client key and private key and put into next api endpoint
@@ -28,12 +29,15 @@ const Portfolio = ({selectedClient,onPortfolioShown })=>
                     {
                         key_name:selectedClient,
                     }
-                )
-
+                );
+                
                 if (response.data.success)
                 {
+                   
                     setBalanceData(response.data.data)
-                    onPortfolioShown(response.data.data)
+                    onPortfolioShown(response.data.data);
+                    onBalanceReady();
+                    
                 }else{
                     setError(response.data.message || 'Failed to fetch balance')
                 }

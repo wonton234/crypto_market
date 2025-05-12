@@ -33,7 +33,7 @@ def validate_and_get_creds():
     reads key_name from request.json and returns either
         (creds_dict, None) or (None, flask_response)
     """
-
+    print("Validating creds...")
     data  = request.get_json(silent=True) or {}
     key_name = data.get("key_name")
     ok,payload,status = check_key_name(key_name, api_keys_store)

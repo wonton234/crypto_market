@@ -14,6 +14,7 @@ class KrakenAPI:
         :param api_key: Your Kraken API key
         :param api_secret: Your Kraken Api secret
         """
+        print("Initializing KrakenAPI") 
         self.api_key = api_key
         self.api_secret = api_secret
         self.api_url = "https://api.kraken.com"

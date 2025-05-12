@@ -3,6 +3,7 @@ import { useState,useEffect } from "react";
 
 const OrderForm = ({selectedClient,selectedClientPortfolio})=>
 {
+    
     const [order,setOrder] = useState(
         {
             ordertype:'',
@@ -22,7 +23,7 @@ const OrderForm = ({selectedClient,selectedClientPortfolio})=>
 
         setOrder({
             ordertype: 'market',
-            type: '',
+            type: 'Buy',
             volume: '',
             pair: '',
             price: '',
@@ -33,6 +34,7 @@ const OrderForm = ({selectedClient,selectedClientPortfolio})=>
     },[selectedClient]
     );
 
+    
     // changing fields
     const handleChange = (e)=>
     {
