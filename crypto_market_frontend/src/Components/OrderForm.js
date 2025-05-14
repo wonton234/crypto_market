@@ -1,9 +1,16 @@
 import axios from "axios";
 import { useState,useEffect } from "react";
+import getPossibleCurrencies from "../helpers/ComponentHelpers";
+import { getMaxVolumeFromPortfolio } from "../helpers/ComponentHelpers";
 
-const OrderForm = ({selectedClient,selectedClientPortfolio})=>
-{
-    
+const OrderForm = ({selectedClient,selectedClientPortfolioData,AllPossiblePairs})=>
+{   
+    // use States
+      const [selectedPair, setSelectedPair] = useState('');
+    const [availablePairs, setAvailablePairs] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [message, setMessage] = useState(null);
+    const [error,setError] = useState(null);
     const [order,setOrder] = useState(
         {
             ordertype:'',
@@ -13,10 +20,27 @@ const OrderForm = ({selectedClient,selectedClientPortfolio})=>
             price: '',
         }
     );
-
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [message, setMessage] = useState(null);
-    const [error,setError] = useState(null);
+    const { baseCurrency, maxVolume } = getMaxVolumeFromPortfolio(
+  selectedPair,
+  availablePairs,
+  selectedClientPortfolioData
+    );
+    // use Effects
+    useEffect(() => {
+    console.log("OrderForm received client:", selectedClient);
+    console.log("OrderForm received portfolio data:", selectedClientPortfolioData);
+        if (selectedClientPortfolioData && AllPossiblePairs)
+        {
+            const pairs = getPossibleCurrencies(selectedClientPortfolioData,AllPossiblePairs)
+            setAvailablePairs(pairs)
+            console.log("Available trading pairs:", pairs);
+           
+            
+        }
+     }, [selectedClient, selectedClientPortfolioData]);
+      
+    
+    
     
     useEffect(()=>
     {
@@ -34,11 +58,16 @@ const OrderForm = ({selectedClient,selectedClientPortfolio})=>
     },[selectedClient]
     );
 
-    
-    // changing fields
+
+
+    // handlers ( changing fields and submit)
     const handleChange = (e)=>
     {
+        
         const {name,value}=e.target;
+        if (name=== "pair") {
+            setSelectedPair(value)
+        }
         setOrder(prev=>({...prev,[name]:value}));
     };
 
@@ -53,7 +82,8 @@ const OrderForm = ({selectedClient,selectedClientPortfolio})=>
         setIsSubmitting(false);
     }
     if (!selectedClient) return <p>Please select a client to place an order.</p>
-
+    
+    
     return(
 
         <div>
@@ -76,6 +106,7 @@ const OrderForm = ({selectedClient,selectedClientPortfolio})=>
                     </select>
                 </label>
 
+                {/* Set Quantity for order (in base currency) */}
                 <label>
                     Quantity:
                     <input
@@ -85,7 +116,13 @@ const OrderForm = ({selectedClient,selectedClientPortfolio})=>
                         onChange={handleChange}
                         step="any"
                         required
+                        max = {maxVolume??undefined}
                     />
+                    {maxVolume !== null && (
+                        <small style={{ marginLeft: '0.5rem', color: 'gray' }}>
+                            Max: {maxVolume}
+                        </small>
+                    )}
                 </label>
 
 
@@ -102,26 +139,31 @@ const OrderForm = ({selectedClient,selectedClientPortfolio})=>
                         />
                     </label>
                 )}
-                <label>
-                Pair:
-                    <input
-                        type="text"
-                        name="pair"
-                        value={order.pair}
-                        onChange={handleChange}
-                        required
-                    />
+                
+                <label htmlFor="pair-select">
+                    Select a Pair: 
                 </label>
+                <select id="pair-select" name = "pair" value={selectedPair} onChange={handleChange}>
+                    <option value="">-- Choose a pair --</option>
+                    {availablePairs.map((pair,index) => (
+                        <option key = {index} value = {pair.pairKey}>
+                                {pair.wsname}
+                        </option>
+                    ))}
+                </select>
 
                 <button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? 'Submitting...' : 'Submit Order'}
                 </button>
             </form>
-
+            
+            
             {message && <p style={{ color: 'green' }}>{message}</p>}
             {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );
 };
+
+
 
 export default OrderForm;

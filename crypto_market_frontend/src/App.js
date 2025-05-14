@@ -2,7 +2,8 @@ import ClientDropdown from './Components/ClientDropdown'
 import Portfolio from './Components/Portfolio';
 import OpenOrders from './Components/OpenOrders';
 import OrderForm from './Components/OrderForm';
-import React, {useState} from 'react'
+import React, {useState,useEffect} from 'react';
+import axios from 'axios';
 import './App.css';
 
 function App() {
@@ -12,7 +13,7 @@ function App() {
   const [selectedClientData, setSelectedClientData] = useState(null);
   const [selectedClientPortfolio, setSelectedClientPortfolio] = useState(null);
   const [balanceReady, setBalanceReady] = useState(false);
-
+  const [PossiblePairs, setPossiblePairs]=useState(null);
   const handleClientSelect = (clientData)=>
   {
     setSelectedClientData(clientData);
@@ -23,7 +24,32 @@ function App() {
   {
     setSelectedClientPortfolio(clientPortfolio);
   };
-  
+  // log updated portfolio data
+  useEffect(() => {
+    if (selectedClientPortfolio) {
+      console.log("Updated portfolio data in App:", selectedClientPortfolio); // This will log the updated portfolio data
+    }
+  }, [selectedClientPortfolio]); 
+
+  // use effect to grab all possible pairs
+  useEffect(()=>{
+    const fetchPairs=  async()=>{
+      try{
+      const response = await axios.get("https://api.kraken.com/0/public/AssetPairs");
+      if (response.data.error && response.data.error.length === 0) {
+        setPossiblePairs(response.data.result);
+      } else {
+        console.error("Kraken API error:", response.data.error);
+      }
+      }
+      catch (e)
+      {
+        console.error("Network or Axios Error for Fetch Pair: ", e)
+      }
+    }
+    fetchPairs();
+  },[])
+
   return (
     <div style={{
     display: 'flex',
@@ -35,7 +61,7 @@ function App() {
       <Portfolio selectedClient={selectedClientData} onPortfolioShown={handlePortfolioShown}
        onBalanceReady={() => setBalanceReady(true)}/>
       {balanceReady &&(<OpenOrders selectedClient = {selectedClientData}/>)}
-      <OrderForm selectedClient={selectedClientData} selectedClientPortfolioData = {selectedClientPortfolio}/>
+     <OrderForm selectedClient={selectedClientData} selectedClientPortfolioData = {selectedClientPortfolio} AllPossiblePairs = {PossiblePairs}/>
     </div>
    
   );

@@ -58,29 +58,58 @@ def check_balance():
     if error_resp:
         return error_resp
     
+    print(f"Credentials validated for {creds.get('key_name')}")
     
-    kraken = KrakenAPI(creds['api_key'],creds['api_secret'])
 
     # get account balance
     try:
-        balance_info= kraken.get_account_balance()
-        if not balance_info:
+        
+        kraken = KrakenAPI(creds['api_key'],creds['api_secret'])
+        print("KrakenAPI instance created")
+        try:
+            print("Attempting to get account balance...")
+            balance_info= kraken.get_account_balance()
+            print(f"Balance info response: {balance_info}")
+
+            if not balance_info:
+                print("No balance info returned")
+                return jsonify({
+                    'success': False,
+                    'message': "Failed to retrieve balance: Empty response"
+                }), 500
+            
+            if 'error' in balance_info and balance_info['error']:
+                print(f"Kraken API returned errors: {balance_info['error']}")
+                return jsonify({
+                    'success': False,
+                    'message': f"Kraken API errors: {', '.join(balance_info['error'])}"
+                }), 500
+            
+            if 'result' not in balance_info:
+                print("Response missing 'result' key")
+                return jsonify({
+                    'success': False,
+                    'message': "Invalid response format from Kraken API"
+                }), 500
+
+            return jsonify({
+                'success': True,
+                'key_name': creds.get('key_name'),  
+                'data': balance_info['result']
+            })
+        
+        except Exception as e:
+            print(f"Error getting account balance: {str(e)}")
             return jsonify({
                 'success': False,
-                'message': "Failed to retrieve balance."
+                'message': f"Error getting account balance: {str(e)}"
             }), 500
-
-        
-        return jsonify({
-            'success': True,
-            'key_name': creds.get('key_name'),  
-            'data': balance_info['result']
-        })
         
     except Exception as e:
+        print(f"Error creating KrakenAPI instance: {str(e)}")
         return jsonify({
             'success': False,
-            'message': str(e)
+            'message': f"Error creating KrakenAPI instance: {str(e)}"
         }), 500
 
 

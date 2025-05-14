@@ -28,12 +28,19 @@ const Portfolio = ({selectedClient,onPortfolioShown,onBalanceReady  })=>
                 const response = await axios.post('http://127.0.0.1:5000/api/check-balance',
                     {
                         key_name:selectedClient,
+                    },
+                    {
+                        headers:
+                        {
+                            'Content-Type':'application/json'
+                        }
                     }
+
                 );
                 
                 if (response.data.success)
                 {
-                   
+                 
                     setBalanceData(response.data.data)
                     onPortfolioShown(response.data.data);
                     onBalanceReady();
@@ -56,10 +63,15 @@ const Portfolio = ({selectedClient,onPortfolioShown,onBalanceReady  })=>
         
         return <p>No client selected</p>
     }
-    if (isLoading)
-    {
-        return <p>Loading Portfolio for {selectedClient}</p>
+    if (isLoading) {
+        return (
+        <div>
+        <p>Loading Portfolio for {selectedClient}...</p>
+        <div className="spinner"> {/* Add a CSS spinner here */} </div>
+        </div>
+        );
     }
+
     if (!balanceData)
     {
         return <p>No balance information available</p>
