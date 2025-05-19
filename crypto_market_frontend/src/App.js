@@ -51,12 +51,7 @@ function App() {
   },[])
 
   return (
-    <div style={{
-    display: 'flex',
-    flexWrap: 'wrap', // This ensures components stack on small screens
-    gap: '2rem', // Adds space between the components
-    alignItems: 'flex-start', // Aligns items at the top
-    }}>
+    <div>
       <ClientDropdown onClientSelect={handleClientSelect}/>
       <Portfolio selectedClient={selectedClientData} onPortfolioShown={handlePortfolioShown}
        onBalanceReady={() => setBalanceReady(true)}/>
@@ -68,3 +63,4 @@ function App() {
 }
 
 export default App;
+
