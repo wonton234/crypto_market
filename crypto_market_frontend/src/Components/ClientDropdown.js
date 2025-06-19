@@ -1,119 +1,114 @@
 import axios from 'axios';
 import {useState, useEffect} from 'react'
 import "../css/ClientDropdown.css"
-const ClientDropdown =({onClientSelect})=>
-{
+
+const ClientDropdown = ({ onClientSelect }) => {
     const [clients, setClients] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError]= useState(null);
-    const [selectedClient,setSelectedClient] = useState('');
-    const [isOpen, setIsOpen] = useState(false);
+    const [error, setError] = useState(null);
+    const [selectedClient, setSelectedClient] = useState('');
 
-
-    useEffect(()=>
-    {
-        const fetchClients = async()=>
-        {
-
-            try{
+    useEffect(() => {
+        const fetchClients = async () => {
+            try {
                 setIsLoading(true);
-            
-            
-                // api endpoint response and catch bad response
+                
                 const response = await axios.get('http://127.0.0.1:5000/api/clients')
-                if(response.data.success)
-                {
+                if (response.data.success) {
                     setClients(response.data.data)
-                }
-                else 
-                {
+                   
+                } else {
                     setError('Failed to load clients');
                 }
-
-                
-            
-            }catch(err){
-            setError(err.message);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
             }
-            finally {
-            setIsLoading(false);
-            }
-
         };
-            fetchClients();
-    },[])
-    const handleChange = (clientId) =>
-    {
-        
+        fetchClients();
+    }, [])
+
+    const handleChange = (clientId) => {
         setSelectedClient(clientId)
         console.log(clientId)
-        // Find the selected client object with its keys
         if (clientId) {
             onClientSelect(clientId)
-          }
+        }
     }
 
-    return(
-        <div>
-            {error &&<p>Error: {error}</p>}
-            
-            {isLoading ?
-            (
-                <p> Loading clients...</p>
-            )
-            :
-            (
-                <div className="relative inline-block text-center">
-                    {/* main button to choose client */}
-                        <button
-                            type="button"
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="inline-flex justify-center items-center w-full px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none"
-                        >
-                        {selectedClient || "Clients"}
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                              className="w-4 h-4 ml-2 -mr-1"
-                            >
-                            <path fillRule="evenodd" d="M10 12l-5-5h10l-5 5z" />
-                            </svg>
-                        </button>
-                        
-                        {/* all possible clients in the dropdown */}
-                        {isOpen && (
-                                <ul className="absolute left-1/2 transform -translate-x-1/2 z-10 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+    // Helper function to truncate long client names
+    const truncateClientName = (name, maxLength = 12) => {
+        if (name.length <= maxLength) return name;
+        return name.substring(0, maxLength) + '...';
+    };
 
-                                {clients.map((client) =>
-                                (
-                                  <li key = {client}>
-                                    <button
-                                        onClick={()=>
-                                        {
-                                            handleChange(client)
-                                            setIsOpen(false);
-                                            
-                                        }
-                                        }
-                                        className=' text-left px-4 py-2  hover:bg-gray-100'>
-                                            {client}
-                                        </button>
-                                  </li>  
-                                ))}
-                            </ul>
-                        )}
-                        
-                    
-              </div>
-           
-            )
-            }
+    if (error) {
+        return <p className="text-red-500 text-sm mb-4">Error: {error}</p>;
+    }
+
+    if (isLoading) {
+        return (
+            <div className="bg-gray-100 p-1 rounded-lg inline-flex mb-4">
+                <div className="px-4 py-2 text-gray-500 animate-pulse">Loading clients...</div>
+            </div>
+        );
+    }
+
+    if (clients.length === 0) {
+        return (
+            <div className="bg-gray-100 p-1 rounded-lg inline-flex mb-4">
+                <div className="px-4 py-2 text-gray-500">No clients found</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mb-4">
+            {/* Show all clients if 5 or fewer, otherwise show scrollable */}
+            {clients.length <= 5 ? (
+                <div className="bg-gray-100 p-1 rounded-lg inline-flex">
+                    {clients.map((client) => (
+                        <button
+                            key={client}
+                            onClick={() => handleChange(client)}
+                            className={`px-4 py-2 rounded-md transition-all duration-200 font-medium whitespace-nowrap ${
+                                selectedClient === client
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                            title={client} // Show full name on hover
+                        >
+                            {truncateClientName(client)}
+                        </button>
+                    ))}
+                </div>
+            ) : (
+                // Scrollable version for many clients
+                <div className="bg-gray-100 p-1 rounded-lg inline-flex max-w-full overflow-x-auto">
+                    <div className="flex space-x-1">
+                        {clients.map((client) => (
+                            <button
+                                key={client}
+                                onClick={() => handleChange(client)}
+                                className={`px-4 py-2 rounded-md transition-all duration-200 font-medium whitespace-nowrap flex-shrink-0 ${
+                                    selectedClient === client
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                                title={client}
+                            >
+                                {truncateClientName(client)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+            
+            {/* Show selected client info */}
             
         </div>
     );
-   
-   
 };
 
 export default ClientDropdown
