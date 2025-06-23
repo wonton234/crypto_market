@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {useState, useEffect} from 'react'
-import "../css/ClientDropdown.css"
+
 
 const ClientDropdown = ({ onClientSelect }) => {
     const [clients, setClients] = useState([]);
@@ -31,7 +31,7 @@ const ClientDropdown = ({ onClientSelect }) => {
 
     const handleChange = (clientId) => {
         setSelectedClient(clientId)
-        console.log(clientId)
+        
         if (clientId) {
             onClientSelect(clientId)
         }

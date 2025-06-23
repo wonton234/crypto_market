@@ -34,9 +34,7 @@ const OrderhtmlForm = ({selectedClient,selectedClientPortfolioData,AllPossiblePa
         if (selectedClientPortfolioData && AllPossiblePairs)
         {
             const pairs = getPossibleCurrencies(selectedClientPortfolioData,AllPossiblePairs)
-            console.log("Pairs: ", pairs)
             setAvailablePairs(pairs)
-            console.log("Available trading pairs:", pairs);
            
             
         }
